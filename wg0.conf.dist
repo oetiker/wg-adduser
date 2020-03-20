@@ -1,0 +1,4 @@
+[Interface]
+Address = 192.168.98.1/23
+ListenPort = 51819
+PrivateKey = # run wg genkey
