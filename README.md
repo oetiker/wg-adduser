@@ -60,7 +60,7 @@ configure firehol in `/etc/firehol/firehol.conf`
 
 ```
 LOCALIF=eno1
-VPNNET=192.168.73.0/24
+VPNNET=10.x.y.0/24
 LOCALNET=192.168.42.0/24
 GWIP=192.168.42.2
 
