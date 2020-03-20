@@ -8,7 +8,7 @@ our $dev;
 our $endpoint;
 our $dns;
 our $localSubNets;
-my $cfgFile = "./add-client.conf";
+my $cfgFile = "/etc/wireguard/wg-adduser.conf";
 
 unless (my $ret = do $cfgFile) {
   die "couldn't parse $cfgFile: $@" if $@;
