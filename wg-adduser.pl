@@ -8,6 +8,7 @@ use Time::Piece;
 our $dev;
 our $endpoint;
 our $dns;
+our $sender;
 our $localSubNets;
 my $cfgFile = "/etc/wireguard/wg-adduser.conf";
 
@@ -26,6 +27,7 @@ my $name = $ARGV[1] // die "specify a name\n";
 my $device = $ARGV[2] // die "specify a device\n";
 my $comment = $ARGV[3] // 'no comment';
 
+local $ENV{EMAIL} = $sender;
 sendMail($email,$name,$device,$comment);
 
 

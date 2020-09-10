@@ -2,3 +2,4 @@ $dev = 'wg0';
 $endpoint = 'wg.mysite.com:51819';
 $dns = '192.168.33.1';
 $localSubNets = '192.168.0.0/24';
+$sender = 'support@example.com'; 
