@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use FindBin;
+use Time::Piece;
 
 our $dev;
 our $endpoint;
@@ -17,13 +18,15 @@ unless (my $ret = do $cfgFile) {
 }
 
 my $email = $ARGV[0] or do {
-  print "$0 email\@address 'commen'\n";
+  print "$0 email\@address 'given family' 'device' 'commen'\n";
   exit 1;
 };
 
-my $comment = $ARGV[1] // 'no comment';
+my $name = $ARGV[1] // die "specify a name\n";
+my $device = $ARGV[2] // die "specify a device\n";
+my $comment = $ARGV[3] // 'no comment';
 
-sendMail($email,$comment);
+sendMail($email,$name,$device,$comment);
 
 
 sub getCfg {
@@ -77,16 +80,23 @@ sub makePubKey {
 
 sub addClient {
   my $email = shift;
+  my $name = shift;
+  my $device = shift;
   my $comment = shift;
   my $cfg = getCfg();
   my $key = makePrivKey();
   my $pub = makePubKey($key);
   my $pubSrv = makePubKey($cfg->{Interface}[0]{PrivateKey});
   my $ip = makeIp($cfg);
+  my $date = localtime->strftime("%Y-%m-%d %H:%M:%S %z");
   open my $fh, ">>/etc/wireguard/${dev}.conf";
   print $fh <<CONF_END;
-# $email / $comment
 [Peer]
+#email: $email
+#name: $name
+#device: $device
+#created: $date
+#comment: $comment
 PublicKey = $pub
 AllowedIPs = $ip/32
 CONF_END
@@ -94,7 +104,9 @@ CONF_END
   my $tmp = "/tmp/wg.conf.$$";
   system "wg-quick strip $dev > $tmp && wg addconf $dev $tmp && rm $tmp";
   return <<CONF_END
-# $email / $comment
+# $name <$email> for $device
+# $date
+# $comment
 [Interface]
 Address = $ip
 PrivateKey = $key
@@ -110,9 +122,11 @@ CONF_END
 
 sub sendMail {
   my $email = shift;
+  my $name = shift;
+  my $device = shift;
   my $comment = shift;
   
-  my $conf =addClient($email,$comment);
+  my $conf =addClient($email,$name,$device,$comment);
   my $tmp = "wireguard.conf";
   open my $fh, ">$tmp";
   print $fh $conf;  
@@ -124,9 +138,9 @@ sub sendMail {
 <html>
 <head></head>
 <body>
-<p>Dear $email</p>
+<p>Dear $name</p>
 
-<p>This is your vpn configuration for accessing ${endpoint}.</p>
+<p>This is your vpn configuration for your $device to access ${endpoint}.</p>
 
 <ol>
 <li>Install a Wireguard <a href="https://www.wireguard.com/install">client</a>.</li>
