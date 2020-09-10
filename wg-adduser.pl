@@ -27,8 +27,7 @@ my $name = $ARGV[1] // die "specify a name\n";
 my $device = $ARGV[2] // die "specify a device\n";
 my $comment = $ARGV[3] // 'no comment';
 
-local $ENV{EMAIL} = $sender;
-sendMail($email,$name,$device,$comment);
+sendMail($sender,$email,$name,$device,$comment);
 
 
 sub getCfg {
@@ -123,6 +122,7 @@ CONF_END
 }
 
 sub sendMail {
+  my $sender = shift;
   my $email = shift;
   my $name = shift;
   my $device = shift;
@@ -135,7 +135,7 @@ sub sendMail {
   close $fh;
   my $qr = `cat <<END|qrencode -o - -t svg|base64\n$conf\nEND\n`;
   
-  open my $mh, '|-','mutt','-eset content_type=text/html','-eset send_charset=utf-8','-sWireguard VPN Configuration','-a'.$tmp,'--',$email;
+  open my $mh, '|-','mutt','-e','send-hook . "my_hdr From: '.$sender.'"','-eset content_type=text/html','-eset send_charset=utf-8','-sWireguard VPN Configuration','-a'.$tmp,'--',$email;
   print $mh <<MAIL_END;
 <html>
 <head></head>
